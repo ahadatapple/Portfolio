@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Content check, type check and build
+        run: npm run build
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --root-dir "${{ github.workspace }}/dist" --exclude-mail --exclude 'linkedin\.com' './dist/**/*.html'
+          fail: true
+      - name: Lighthouse
+        run: npx --yes @lhci/cli@0.15.x autorun

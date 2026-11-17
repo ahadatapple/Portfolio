@@ -1,0 +1,82 @@
+---
+title: Gomoku AI engine
+order: 2
+result: An opening fix took the engine from 14 of 20 to 20 of 20 against the hardest bot from an empty board.
+rowLine: Fixed a weak opening · 14 of 20 to 20 of 20 against the hardest bot from an empty board
+summary: A Gomoku engine in Python that looks one move ahead and scores each board with a hand-written evaluation. It beat the hardest test bot in 14 of 20 games, losing early because it had no opening strategy. After an opening fix it won 20 of 20 from an empty board.
+role: Rice Emerging Scholars Program
+org: Rice University
+dates: Jun to Aug 2026
+stack: [Python, NumPy, Game-tree search, Heuristics]
+links:
+  - label: Code on GitHub
+    href: https://github.com/ahadatapple/Gomoku-AI
+description: A Python Gomoku engine with a hand-written evaluation. An opening fix took it from 14 of 20 to 20 of 20 against the hardest course bot from an empty board.
+---
+
+import Flow from '../../components/Flow.astro';
+
+## The problem and constraints
+
+Gomoku is five in a row on a grid. Two players alternate placing stones, and the first to line up five wins. The task was to build an agent that wins against test bots under a compute limit.
+
+- **One move of lookahead.** The search tries every open square and scores the board each one produces. Everything the engine knows about strategy has to live in that score.
+- **Opponents.** Test bots of increasing strength, the hardest of which is the benchmark, plus peer bots.
+- **Speed.** Each move takes a fraction of a second.
+- **Evidence.** A change counts as an improvement only if it wins more games.
+
+## System architecture and key trade-offs
+
+<Flow
+  caption="One move"
+  stages={[
+    { nodes: [{ title: 'Board state', detail: 'NumPy array' }] },
+    { nodes: [{ title: 'Try every open square', detail: 'one move ahead' }], edge: 'score each resulting board' },
+    {
+      nodes: [
+        { title: 'Own patterns', detail: 'attack score' },
+        { title: 'Opponent patterns', detail: 'defense score' },
+        { title: 'Opening routine', detail: 'early moves' },
+      ],
+    },
+    { nodes: [{ title: 'Value = attack − defense', accent: true }], edge: 'highest value wins' },
+    { nodes: [{ title: 'Chosen move' }] },
+  ]}
+/>
+
+<Flow
+  caption="The test loop · run after every change"
+  stages={[
+    { nodes: [{ title: 'Engine version' }, { title: 'Opponent bot' }] },
+    { nodes: [{ title: 'Tournament', detail: '20 games per matchup' }] },
+    { nodes: [{ title: 'Win rate per matchup' }] },
+    { nodes: [{ title: 'Compare with the previous version', accent: true }] },
+  ]}
+/>
+
+**Patterns, not just lines.** The evaluation scans every row, column and diagonal for runs of two, three and four stones, for both players. The engine’s own patterns add to an attack score, the opponent’s to a defense score, and the move with the highest attack minus defense wins.
+
+**A tournament after every change, instead of judging by watching games.** Every strategy change ran through 20 games per matchup, and the win rate decided whether it stayed. Twenty games is quick enough to run every time. The cost is resolution: one game is 5 points of win rate.
+
+## Hard metrics and outcomes
+
+| Matchup | Before the fix | After the fix |
+| --- | --- | --- |
+| Hardest bot, from an empty board | 14 of 20 (70%) | 20 of 20 (100%) |
+| Peer bots | — | 100% win rate |
+
+- **Selection:** one of 38 first-year presentation spots at Rice’s STEM Symposium.
+
+## What broke and lessons learned
+
+**The opening was weak.** The engine had no opening strategy. Its first stones went down without a plan, and the harder bots won early in the game.
+
+**How I found it.** I played the engine’s moves exactly against a friend who already knew Gomoku strategy. Following the engine move for move, my early game was weak, which pointed at the opening rather than the mid-game patterns.
+
+**The fix.** An opening routine that steers the first stones to chosen squares instead of leaving them to chance. The next empty-board tournament against the hardest bot was 20 of 20.
+
+### Lessons
+
+- The jump from 14 wins to 20 came from the opening, not the mid-game scoring. The weakest part of a strategy is often the part with no strategy at all.
+- A human playtest found what the win rate could not explain. The tournament said the engine was losing; playing its moves showed where.
+- Twenty games per matchup can show a 30-point change. It cannot show a 5-point one. The next step is more games from varied starting positions, since games between two deterministic players from an empty board can repeat move for move.

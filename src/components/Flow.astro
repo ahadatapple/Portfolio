@@ -1,0 +1,191 @@
+---
+// A top-to-bottom flow diagram built from an ordered list. Each stage holds
+// one or more nodes; nodes in the same stage run side by side. Arrows run
+// from every stage to the next. Pure HTML and CSS: no script, no layout shift.
+
+export interface FlowNode {
+  title: string;
+  detail?: string;
+  accent?: boolean;
+}
+
+export interface FlowStage {
+  nodes: FlowNode[];
+  // Label on the arrow that leads out of this stage.
+  edge?: string;
+}
+
+interface Props {
+  caption: string;
+  stages: FlowStage[];
+  note?: string;
+}
+
+const { caption, stages, note } = Astro.props;
+---
+
+<figure class="flow">
+  <ol class="stages">
+    {
+      stages.map((stage, i) => (
+        <li class="stage">
+          <ul class:list={['nodes', `cols-${Math.min(stage.nodes.length, 4)}`]}>
+            {stage.nodes.map((node) => (
+              <li class:list={['node', { accent: node.accent }]}>
+                <span class="node-title">{node.title}</span>
+                {node.detail && <span class="node-detail">{node.detail}</span>}
+              </li>
+            ))}
+          </ul>
+          {i < stages.length - 1 && (
+            <div class="arrow" aria-hidden="true">
+              {stage.edge && <span class="edge">{stage.edge}</span>}
+            </div>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+  <figcaption>
+    <span class="cap">{caption}</span>
+    {note && <span class="note">{note}</span>}
+  </figcaption>
+</figure>
+
+<style>
+  .flow {
+    margin: var(--space-6) 0;
+    padding: var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .stages,
+  .nodes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nodes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .node {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.25rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1.25px solid var(--muted);
+    border-radius: var(--radius);
+    text-align: center;
+    background: var(--bg);
+  }
+
+  .node.accent {
+    border: 2px solid var(--accent);
+    background: var(--accent-tint);
+  }
+
+  .node-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .node-detail {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .arrow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 2rem;
+    margin-left: 50%;
+  }
+
+  .arrow::before {
+    content: '';
+    position: absolute;
+    left: -0.5px;
+    top: 0.25rem;
+    bottom: 0.4rem;
+    border-left: 1.25px solid var(--muted);
+  }
+
+  .arrow::after {
+    content: '';
+    position: absolute;
+    left: -4.5px;
+    bottom: 0.25rem;
+    border-left: 4.5px solid transparent;
+    border-right: 4.5px solid transparent;
+    border-top: 6px solid var(--muted);
+  }
+
+  .edge {
+    padding-left: var(--space-3);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.3;
+    max-width: 45vw;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: var(--space-4);
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  .cap {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  @media (max-width: 30rem) {
+    .flow {
+      padding: var(--space-4) var(--space-3);
+    }
+
+    .nodes {
+      gap: var(--space-2);
+    }
+
+    .node {
+      padding: var(--space-2);
+    }
+
+    .node-title {
+      font-size: 0.8125rem;
+    }
+
+    .node-detail {
+      font-size: 0.6875rem;
+    }
+  }
+</style>

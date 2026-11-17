@@ -1,0 +1,61 @@
+---
+// A two-state switch between light and dark. The first visit follows the OS.
+---
+
+<button class="theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false">
+  <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linejoin="round"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: calc(-1 * var(--space-3));
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    color: var(--text);
+    background: var(--code-bg);
+  }
+
+  .theme-toggle[aria-pressed='true'] {
+    color: var(--accent-ink);
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const button = document.querySelector('.theme-toggle');
+    if (!button) return;
+    const root = document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const isDark = () => root.dataset.theme === 'dark' || (!root.dataset.theme && media.matches);
+    const sync = () => button.setAttribute('aria-pressed', String(isDark()));
+    sync();
+    media.addEventListener('change', sync);
+    button.addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch (_) {
+        /* The choice lasts for this page view only. */
+      }
+      sync();
+    });
+  })();
+</script>

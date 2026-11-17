@@ -1,0 +1,264 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+import { profile, alsoShipped, skills, about, experience, education, honors } from '../data/site';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: 'Electrical and Computer Engineering student',
+  email: `mailto:${profile.email}`,
+  ...(Astro.site && { url: Astro.site.href }),
+  affiliation: { '@type': 'CollegeOrUniversity', name: 'Rice University' },
+  sameAs: [profile.linkedin, ...(profile.github ? [profile.github] : [])],
+};
+---
+
+<Base jsonLd={person}>
+  <div class="container">
+    <section class="hero" aria-labelledby="hero-name">
+      <h1 id="hero-name">{profile.name}</h1>
+      <p class="hero-line">{profile.hero}</p>
+      <ul class="identity">
+        {profile.identity.map((item) => <li>{item}</li>)}
+      </ul>
+      <ContactLinks />
+
+      <h2 class="visually-hidden">Selected work</h2>
+      <ol class="rows">
+        {
+          projects.map((project) => (
+            <li>
+              <a href={`/projects/${project.id}`}>{project.data.title}</a>
+              <span class="row-line">{project.data.rowLine}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section id="projects" class="section" aria-labelledby="projects-title">
+      <h2 id="projects-title">Projects</h2>
+      <div class="cards">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="shipped-title">
+      <h2 id="shipped-title">Also shipped</h2>
+      <div class="short-cards">
+        {
+          alsoShipped.map((card) => (
+            <article class="short-card">
+              <h3>{card.title}</h3>
+              <p class="meta">
+                {card.context} · {card.dates}
+              </p>
+              <p>{card.body}</p>
+              {card.links.length > 0 && (
+                <ul class="link-row">
+                  {card.links.map((link) => (
+                    <li>
+                      <a href={link.href}>{link.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="skills-title">
+      <h2 id="skills-title">Skills, with the work that shows them</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Skill</th>
+              <th scope="col">Shown in</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              skills.map((row) => (
+                <tr>
+                  <th scope="row" class="skill">
+                    {row.skill}
+                  </th>
+                  <td>{row.evidence}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="about" class="section" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      <div class="about">
+        {about.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+
+      <h3 class="sub">Experience</h3>
+      <ol class="timeline">
+        {
+          experience.map((role) => (
+            <li>
+              <p class="role">
+                <strong>{role.title}</strong> · {role.org}
+              </p>
+              <p class="meta">{role.dates}</p>
+              {role.body && <p>{role.body}</p>}
+            </li>
+          ))
+        }
+      </ol>
+
+      <h3 class="sub">Education</h3>
+      <p class="role"><strong>{education.school}</strong> · {education.degree}</p>
+      <p class="meta">{education.dates}</p>
+      <p class="coursework"><span class="muted">Coursework:</span> {education.coursework}</p>
+
+      <h3 class="sub">Honors and activities</h3>
+      <ul class="honors">
+        {honors.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-7) var(--space-6);
+  }
+
+  .hero > * + * {
+    margin-top: var(--space-4);
+  }
+
+  .hero-line {
+    font-size: 1.25rem;
+    line-height: 1.45;
+    max-width: 34ch;
+  }
+
+  .identity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  .rows {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+
+  .rows li:last-child {
+    border-bottom: 0;
+  }
+
+  .rows li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .rows a {
+    font-weight: 600;
+  }
+
+  .row-line {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  .cards,
+  .short-cards {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .short-card > * + * {
+    margin-top: var(--space-2);
+  }
+
+  .short-card + .short-card {
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+  }
+
+  .skill {
+    font-family: var(--sans);
+    font-size: 0.9375rem;
+    font-weight: 550;
+    color: var(--text);
+    border-bottom-color: var(--rule);
+  }
+
+  .about > * + * {
+    margin-top: var(--space-4);
+  }
+
+  .sub {
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-3);
+  }
+
+  .timeline,
+  .honors {
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline li {
+    padding-block: var(--space-3);
+  }
+
+  .timeline li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .timeline li > * + * {
+    margin-top: var(--space-1);
+  }
+
+  .coursework {
+    margin-top: var(--space-2);
+  }
+
+  .honors li {
+    padding-block: var(--space-1);
+  }
+
+  @media (min-width: 40rem) {
+    .rows li {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .row-line {
+      text-align: right;
+      max-width: 60%;
+    }
+  }
+</style>

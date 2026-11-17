@@ -1,0 +1,87 @@
+---
+title: AscentUP
+order: 3
+result: 20 bugs found across 7 modules, 6 environment blockers resolved, 2 fixes shipped to production.
+rowLine: QA across 7 modules and a 41-table database · 20 bugs found, 2 fixes in production
+summary: Through AscentUP, I worked on the web app of a partner health startup. It had bugs nobody had mapped and a development environment that kept failing. I ran QA across 7 app modules, checked what the UI showed against a 41-table PostgreSQL database, and fixed the environment blockers that were holding up other fixes.
+role: Software Engineering Intern
+org: AscentUP, remote
+dates: Jul to Aug 2026
+stack: [Next.js, Supabase, PostgreSQL, SQL, Docker, Git]
+description: QA and environment repair for a health startup’s Next.js and Supabase app. 20 bugs found across 7 modules and 2 fixes shipped.
+---
+
+import Flow from '../../components/Flow.astro';
+
+## The problem and constraints
+
+As an AscentUP intern I worked on the web app of a health startup that AscentUP partnered with. The app runs on Next.js and Supabase, backed by a PostgreSQL database of 41 tables. Three kinds of people use it: administrators, regular users, and hosts who post paid programs. Two things were slowing the team when I joined: bugs that had not been found or written down, and a development environment that kept failing.
+
+- **An unfamiliar production codebase,** with no prior knowledge of the code.
+- **Seven app modules to cover,** each used differently by each kind of account.
+- **Remote work.** Findings and fixes had to be written down for the team.
+- **Bugs had to be located.** A report that a page looks wrong is not enough to fix it. Each report needed the cause.
+
+## System architecture and key trade-offs
+
+<Flow
+  caption="The system"
+  note="Local development ran the same stack through Docker, Supabase and Git. That is where the environment blockers were."
+  stages={[
+    {
+      nodes: [
+        { title: 'Administrators' },
+        { title: 'Regular users' },
+        { title: 'Program hosts' },
+      ],
+    },
+    { nodes: [{ title: 'Next.js app', detail: '7 modules, sign-in by role' }] },
+    { nodes: [{ title: 'Supabase' }] },
+    { nodes: [{ title: 'PostgreSQL', detail: '41 tables', accent: true }] },
+  ]}
+/>
+
+<Flow
+  caption="The QA method · applied to each module"
+  stages={[
+    { nodes: [{ title: 'UI test', detail: 'What does the user see?' }] },
+    { nodes: [{ title: 'Code trace', detail: 'Which path produced it?' }] },
+    { nodes: [{ title: 'SQL check', detail: 'What is in the database?' }] },
+    { nodes: [{ title: 'Bug report', detail: 'symptom, cause, severity' }] },
+    { nodes: [{ title: 'Fix or hand off', accent: true }] },
+  ]}
+/>
+
+**Three layers of evidence, instead of UI testing alone.** For each module I tested the UI, traced the behaviour through the Next.js code, and ran SQL against the database to check what was stored. UI testing shows that something is wrong. The trace and the query show where. This is slower per bug, and it produces reports someone can act on.
+
+**Every module, as every kind of user.** I swept all 7 modules and recorded each bug with a severity. A flow that works for an administrator can fail for a program host, so I tested each flow from the account type that uses it. The output was a list of 20 bugs, including one high-severity blocker.
+
+**Environment before bug fixes.** Fixes were waiting on a development environment that did not work. I resolved 6 blockers across Docker, Supabase and Git by reading the logs. Three dependent bug fixes went ahead after that.
+
+**Write every fix down.** I documented each environment fix for the team, so the next person to hit the same error has the answer.
+
+## Hard metrics and outcomes
+
+| Measure | Result |
+| --- | --- |
+| Modules covered | 7 |
+| Database tables checked against | 41 |
+| Bugs found | 20, including 1 high-severity blocker |
+| Environment blockers resolved | 6, in Docker, Supabase and Git |
+| Dependent fixes unblocked | 3 |
+| Fixes shipped to production | 2 |
+
+Every environment fix is documented for the team.
+
+## What broke and lessons learned
+
+**Sign-in and role flows took longest.** The hardest bugs were in the logic of user sign-in and in how the app responded to input. Each kind of account moves through the app differently, and the flows for administrators, regular users and program hosts were often inconvenient for the person using them. Tracing those meant following one action through the UI, the code and the database, once per account type.
+
+**The development environment.** The local setup failed in Docker, Supabase and Git, and each failure stopped work that depended on it. I worked through them one at a time from the logs, fixed each, and wrote the fix down before moving on.
+
+### Lessons
+
+- Test as each kind of user. A role-based app is several apps sharing one codebase.
+- Fix the environment first. Three bug fixes were held up by setup problems, not by the bugs themselves.
+- Check the database. What the UI shows and what is stored can differ, and only the query settles which is wrong.
+- Document as you go. A fix that lives in one person’s terminal history has to be found again by the next person.

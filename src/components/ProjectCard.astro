@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, role, org, dates, summary, result, stack, status } = project.data;
+const href = `/projects/${project.id}`;
+const headingId = `card-${project.id}`;
+---
+
+<article class="card" aria-labelledby={headingId}>
+  <p class="meta">{role} · {org} · {dates}</p>
+  <h3 id={headingId}><a href={href}>{title}</a></h3>
+  <p>{summary}</p>
+  <p class="result">
+    <strong>{status ? 'Result so far:' : 'Result:'}</strong>{' '}
+    {result}
+  </p>
+  <ul class="stack-list" aria-label="Stack">
+    {stack.map((item) => <li>{item}</li>)}
+  </ul>
+  <p class="more"><a href={href}>Read the write-up<span class="visually-hidden">: {title}</span> <span aria-hidden="true">→</span></a></p>
+</article>
+
+<style>
+  .card {
+    padding: var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .card > * + * {
+    margin-top: var(--space-3);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  h3 a:hover {
+    text-decoration: underline;
+  }
+
+  .result {
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--accent);
+  }
+
+  .more {
+    font-weight: 550;
+  }
+</style>

@@ -1,0 +1,166 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { profile } from '../../data/site';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  next: CollectionEntry<'projects'>;
+}
+
+const { project, next } = Astro.props;
+const { Content, headings } = await render(project);
+const d = project.data;
+const sections = headings.filter((h) => h.depth === 2);
+const updated = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'America/Chicago' });
+---
+
+<Base
+  title={`${d.title} · ${profile.name}`}
+  description={d.description}
+  type="article"
+  ogImage={`/og/${project.id}.png`}
+  ogImageAlt={`${d.title}: ${d.result}`}
+>
+  <article class="container case" aria-labelledby="case-title">
+    <header class="case-header">
+      <p class="back"><a href="/#projects">← All projects</a></p>
+      <h1 id="case-title">{d.title}</h1>
+      <p class="result">{d.result}</p>
+      <dl class="facts">
+        <div>
+          <dt>Role</dt>
+          <dd>{d.role}</dd>
+        </div>
+        <div>
+          <dt>Where</dt>
+          <dd>{d.org}</dd>
+        </div>
+        <div>
+          <dt>When</dt>
+          <dd>{d.dates}</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>{d.stack.join(', ')}</dd>
+        </div>
+      </dl>
+      {
+        d.links.length > 0 && (
+          <ul class="link-row">
+            {d.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        d.status && (
+          <p class="callout">
+            <strong>Status, {updated}:</strong> {d.status}
+          </p>
+        )
+      }
+      <p class="summary">{d.summary}</p>
+      {
+        sections.length > 1 && (
+          <nav class="toc" aria-label="On this page">
+            <p class="section-label">On this page</p>
+            <ol>
+              {sections.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="case-footer">
+      <p class="section-label">Next project</p>
+      <p><a class="next" href={`/projects/${next.id}`}>{next.data.title} →</a></p>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .case {
+    padding-top: var(--space-6);
+  }
+
+  .case-header > * + * {
+    margin-top: var(--space-4);
+  }
+
+  .back {
+    font-size: 0.9375rem;
+  }
+
+  .result {
+    font-size: 1.1875rem;
+    line-height: 1.45;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: var(--space-3) var(--space-5);
+    margin: var(--space-5) 0 0;
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--rule);
+  }
+
+  .facts dt {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .facts dd {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  .summary {
+    font-size: 1.0625rem;
+  }
+
+  .toc ol {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .toc li + li {
+    margin-top: var(--space-1);
+  }
+
+  .case-footer {
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+  }
+
+  .next {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+</style>

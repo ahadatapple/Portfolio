@@ -1,0 +1,20 @@
+---
+import { profile } from '../data/site';
+
+const links = [
+  { label: 'Résumé (PDF)', href: profile.resume },
+  ...(profile.github ? [{ label: 'GitHub', href: profile.github }] : []),
+  { label: 'LinkedIn', href: profile.linkedin },
+  { label: profile.email, href: `mailto:${profile.email}` },
+];
+---
+
+<ul class="link-row">
+  {
+    links.map((link) => (
+      <li>
+        <a href={link.href}>{link.label}</a>
+      </li>
+    ))
+  }
+</ul>

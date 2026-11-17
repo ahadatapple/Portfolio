@@ -1,0 +1,80 @@
+---
+title: Gesture recognition for accessible XR
+order: 1
+result: Three time-series classifiers, each above 95% on 21 held-out recordings. Research in progress.
+rowLine: Yamagami Lab · three classifiers, each above 95% on 21 held-out recordings · preliminary
+summary: People with motor disabilities from stroke, Parkinson’s disease or spinal-cord injury often cannot use standard XR controllers reliably. I am building a pipeline that recognises gestures from video instead, and comparing three time-series classifiers on a dataset I recorded.
+role: Undergraduate Researcher
+org: Yamagami Lab, Rice University
+dates: Sep 2026 to present
+stack: [Python, SVM, Random Forest, MiniRocket]
+status: Dataset recorded. Three classifiers trained and tested on one split. Next, cross-validation and timing each model’s predictions.
+description: Gesture recognition from video for XR users with motor disabilities. SVM, Random Forest and MiniRocket compared on 121 recordings of 3 gestures.
+---
+
+import Flow from '../../components/Flow.astro';
+
+## The problem and constraints
+
+An XR controller expects a steady grip and fine finger control. This project replaces it with gestures sensed from video, so the input works for people who cannot use a controller reliably.
+
+My part is the recognition step: given a recording of a gesture, decide which gesture it is.
+
+Three constraints shape the work:
+
+- **Small data.** I recorded the dataset myself: 121 video recordings of 3 gestures.
+- **Real-time use.** The classifier is meant for live patient input, so time per prediction matters as well as accuracy.
+- **One recorder.** Every recording so far is of me.
+
+## System architecture and key trade-offs
+
+<Flow
+  caption="Recognition pipeline · one split, three classifiers"
+  note="All three models train on the same 100 recordings and are scored on the same 21."
+  stages={[
+    { nodes: [{ title: 'Record gesture videos', detail: '121 recordings' }] },
+    { nodes: [{ title: 'Process video into time series', detail: 'video-sensing data' }] },
+    { nodes: [{ title: 'Split', detail: '100 train / 21 test' }] },
+    {
+      nodes: [
+        { title: 'SVM' },
+        { title: 'Random Forest' },
+        { title: 'MiniRocket' },
+      ],
+    },
+    { nodes: [{ title: 'Score on the 21 held-out recordings', accent: true }] },
+  ]}
+/>
+
+**Three classifiers on one split, instead of one classifier.** I trained an SVM, a Random Forest and MiniRocket on the same 100 recordings and tested them on the same 21, so the comparison is like for like. They cover two approaches. SVM and Random Forest are general-purpose classifiers. MiniRocket is built for time series: it transforms each series with a large set of convolutional kernels and fits a linear classifier on the result.
+
+**A held-out test set, instead of training accuracy.** The models never saw the 21 test recordings during training. Accuracy on the training recordings would only show that a model can memorise them.
+
+**More than accuracy to choose a model.** All three cleared 95%, so accuracy on this split does not separate them. The choice will rest on cross-validated accuracy, time per prediction, and how each model handles a person it has not seen.
+
+## Hard metrics and outcomes
+
+| Classifier | Accuracy on the held-out recordings |
+| --- | --- |
+| SVM | above 95% |
+| Random Forest | above 95% |
+| MiniRocket | above 95% |
+
+- **Dataset:** 121 self-recorded videos of 3 gestures, 100 for training and 21 held out for testing.
+- **Result:** every classifier scored above 95%. With 21 test recordings, one error is worth about 4.8 points.
+- **Standing:** preliminary. One split, one recorder.
+- **Review:** I present results in lab meetings.
+
+## What broke and lessons learned
+
+**The first test could not rank the models.** With 21 test recordings, three models that all score above 95% are effectively tied. A single split also depends on which 21 recordings happen to land in the test set. The next run uses 5-fold cross-validation, so every recording is tested once and each model gets an average and a spread.
+
+**The dataset has one person in it.** A model that recognises my gestures has not shown it can recognise anyone else’s. The project exists for patients with motor disabilities, so testing on other people’s recordings comes before any claim about them.
+
+### Open questions I am working on
+
+- Does the ranking of the three models change under cross-validation?
+- Which model is fastest per prediction?
+- How far does accuracy drop on a person the model has not seen?
+
+<p class="meta">Research conducted in the Yamagami Lab at Rice University.</p>

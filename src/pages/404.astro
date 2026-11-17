@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import { profile } from '../data/site';
+---
+
+<Base title={`Page not found · ${profile.name}`} description="This page does not exist.">
+  <section class="container missing" aria-labelledby="missing-title">
+    <p class="meta">404</p>
+    <h1 id="missing-title">This page does not exist.</h1>
+    <p>The link may be old, or the address may have a typo.</p>
+    <ul class="link-row">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#projects">Projects</a></li>
+      <li><a href={profile.resume}>Résumé</a></li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .missing {
+    padding-block: var(--space-8);
+  }
+
+  .missing > * + * {
+    margin-top: var(--space-4);
+  }
+</style>
