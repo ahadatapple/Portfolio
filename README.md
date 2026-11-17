@@ -1,6 +1,6 @@
 # Ahad Rahman · Portfolio
 
-Personal site for an ECE student at Rice University: three engineering case studies, two short project cards, and a résumé. Static HTML from Astro, no client framework, no tracking.
+Personal site.
 
 **Every page scores 100 on Lighthouse** for performance, accessibility, best practices and SEO, on mobile and desktop, with zero layout shift. Each page is about 7 KB over the wire, with all CSS inlined and two small inline scripts.
 
